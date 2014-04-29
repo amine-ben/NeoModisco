@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.modisco.infra.discovery.core.discoverer">
+      <discoverer
+            class="org.eclipse.modisco.java.discoverer.neo4emf.JavaModelDiscovererNeo4emf"
+            id="org.eclipse.modisco.java.discoverer.neo4emf">
+      </discoverer>
+   </extension>
+   <extension
+         point="org.eclipse.modisco.infra.discovery.ui.discoverer">
+      <discoverer
+            discovererID="org.eclipse.modisco.java.discoverer.neo4emf"
+            icon="icons/neo-icon.png"
+            label="Discover JProject-NEO4EMF">
+      </discoverer>
+   </extension>
+
+</plugin>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<fragment>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="org.eclipse.gmt.modisco.infra.browser.fragment.objectContribution1"
+            objectClass="org.eclipse.core.resources.IFolder">
+         <action
+               class="org.eclipse.gmt.modisco.infra.browser.actions.OpenNeoResourceAction"
+               id="org.eclipse.gmt.modisco.infra.browser.neo4emf.openNeoResourceAction"
+               label="open NeoResource">
+         </action>
+         <menu
+               icon="icons/full/obj16/MoDiscoModelIcon.gif"
+               id="org.eclipse.gmt.modisco.infra.browser.neo4emf.menu1"
+               label="Open NeoResource">
+            <separator
+                  name="org.eclipse.gmt.modisco.infra.browser.fragment.separator1">
+            </separator>
+         </menu>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.eclipse.gmt.modisco.infra.browser.editors.Neo4EMFBrowser"
+            contributorClass="org.eclipse.gmt.modisco.infra.browser.editors.BrowserActionBarContributor"
+            default="false"
+            id="org.eclipse.gmt.modisco.infra.browser.NeoEditor"
+            name="Neo Resource Editor">
+      </editor>
+   </extension>
+
+</fragment>
