@@ -1,7 +1,5 @@
 package org.eclipse.gmt.modisco.infra.browser.filters;
 
-import java.io.File;
-
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.gmt.modisco.infra.browser.util.Neo4EMFEditorInput;
 import org.eclipse.ui.IActionFilter;

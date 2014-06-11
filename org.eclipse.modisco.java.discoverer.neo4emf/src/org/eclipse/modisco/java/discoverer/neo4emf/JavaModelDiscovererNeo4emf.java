@@ -6,24 +6,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.print.attribute.standard.Severity;
-
-import org.apache.lucene.analysis.CharArrayMap.EntrySet;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.modisco.infra.discovery.ui.internal.celleditors.composite.TargetURIComposite;
 import org.eclipse.modisco.java.discoverer.DiscoverJavaModelFromJavaProject;
 
 import fr.inria.atlanmod.neo4emf.INeo4emfResource;
 import fr.inria.atlanmod.neo4emf.INeo4emfResourceFactory;
-import fr.inria.atlanmod.neo4emf.change.IChangeLog;
 import fr.inria.atlanmod.neo4emf.change.impl.ChangeLog;
 import fr.inria.atlanmod.neo4emf.change.impl.Entry;
 import fr.inria.atlanmod.neo4emf.change.impl.NewObject;
+import fr.inria.atlanmod.neo4emf.drivers.NESession;
 import fr.inria.atlanmod.neo4emf.logger.Logger;
 
 import org.eclipse.gmt.modisco.java.emf.JavaFactory;
@@ -43,11 +39,16 @@ public class JavaModelDiscovererNeo4emf extends DiscoverJavaModelFromJavaProject
 				e.printStackTrace();
 			}
 					}	
-		URI uri = URI.createURI("neo4emf:/"+pathToResource);
-		getResourceSet().getResourceFactoryRegistry().getProtocolToFactoryMap().
-				put("neo4emf", INeo4emfResourceFactory.eINSTANCE.setRelationshipsMap(ReltypesMappings.getInstance().getMap()));
-		// Create the resource 
-		INeo4emfResource resource = (INeo4emfResource) getResourceSet().createResource(uri);
+//		URI uri = URI.createURI("neo4emf:/"+pathToResource);
+//		getResourceSet().getResourceFactoryRegistry().getProtocolToFactoryMap().
+//				put("neo4emf", INeo4emfResourceFactory.eINSTANCE.setRelationshipsMap(ReltypesMappings.getInstance().getMap()));
+//		// Create the resource 
+//		INeo4emfResource resource = (INeo4emfResource) getResourceSet().createResource(uri);
+//		String dirPath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString()+dbFolder.getFullPath().toString();
+		URI n4eResourceUri = createNeo4emfURI(pathToResource);
+		NESession session = new NESession(org.eclipse.gmt.modisco.java.neo4emf.meta.JavaPackage.eINSTANCE);
+		INeo4emfResource resource = session.createResource(n4eResourceUri, 100000);
+		
 		setTargetModel(resource);
 		return resource;		
 	}
@@ -111,7 +112,7 @@ public class JavaModelDiscovererNeo4emf extends DiscoverJavaModelFromJavaProject
 		try{
 			long start = System.currentTimeMillis();
 			Logger.log(Logger.SEVERITY_INFO, "Starting to save the model in Neo4EMF Resource : " + getTargetModel().getURI().lastSegment() );
-			inspectChanges();
+			//inspectChanges();
 			((INeo4emfResource)getTargetModel()).save(options);			
 			long end = System.currentTimeMillis();
 			long time = end - start;
@@ -121,45 +122,57 @@ public class JavaModelDiscovererNeo4emf extends DiscoverJavaModelFromJavaProject
 			sec = sec % 60;
 			Logger.log(Logger.SEVERITY_INFO, "Finished saving the model, time taken is : "+min +"mins, "+sec+ " secs, "+ms+ " millis" );
 		}finally{
-			((INeo4emfResource)getTargetModel()).shutdown();
+			//((INeo4emfResource)getTargetModel()).shutdown();
 		}
 	}
 
-	private void inspectChanges() {
-		
-		Logger.log(Logger.SEVERITY_INFO, "Starting inspection of ChangeLog");
-		Iterator<Entry> iterator = ChangeLog.getInstance().iterator();
-		int numberOfObjects = 0;
-		Entry witness = null;
-		EClass eClass =  null;
-		int value = 0;
-		Map<EClass, Integer> class2sizeMap = new HashMap<EClass, Integer>();
-		while (iterator.hasNext()) {
-			witness = iterator.next();
-			value = 1;
-			if (witness instanceof NewObject) {
-				numberOfObjects++;
-				eClass = witness.geteObject().eClass();
-				if (class2sizeMap.containsKey(eClass)) {
-					value = class2sizeMap.get(eClass);
-					class2sizeMap.remove(eClass);
-					
-				}
-					class2sizeMap.put(eClass, value+1);		
-			}
-			
-		}
-		
-		
-		Logger.log(Logger.SEVERITY_INFO, "Printing results to the log");
-		
-		for (java.util.Map.Entry<EClass, Integer> entry : class2sizeMap.entrySet()) {
-			
-			Logger.log(Logger.SEVERITY_INFO, "The size of "+entry.getKey()+" is : "+entry.getValue());
-			
-		}
-		
-	}
+//	private void inspectChanges() {
+//		
+//		Logger.log(Logger.SEVERITY_INFO, "Starting inspection of ChangeLog");
+//		Iterator<Entry> iterator = ChangeLog.getInstance().iterator();
+//		int numberOfObjects = 0;
+//		Entry witness = null;
+//		EClass eClass =  null;
+//		int value = 0;
+//		Map<EClass, Integer> class2sizeMap = new HashMap<EClass, Integer>();
+//		while (iterator.hasNext()) {
+//			witness = iterator.next();
+//			value = 1;
+//			if (witness instanceof NewObject) {
+//				numberOfObjects++;
+//				eClass = witness.geteObject().eClass();
+//				if (class2sizeMap.containsKey(eClass)) {
+//					value = class2sizeMap.get(eClass);
+//					class2sizeMap.remove(eClass);
+//					
+//				}
+//					class2sizeMap.put(eClass, value+1);		
+//			}
+//			
+//		}
+//		
+//		
+//		Logger.log(Logger.SEVERITY_INFO, "Printing results to the log");
+//		
+//		for (java.util.Map.Entry<EClass, Integer> entry : class2sizeMap.entrySet()) {
+//			
+//			Logger.log(Logger.SEVERITY_INFO, "The size of "+entry.getKey()+" is : "+entry.getValue());
+//			
+//		}
+//		
+//	}
 	
+	
+	private static URI createNeo4emfURI(String path) {
+		URI fileUri = URI.createFileURI(path);
+		URI uri = URI.createHierarchicalURI(
+				"neo4emf", 
+				fileUri.authority(),
+				fileUri.device(),
+				fileUri.segments(),
+				fileUri.query(),
+				fileUri.fragment());
+		return uri;
+	}
 
 }
